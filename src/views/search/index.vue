@@ -1,9 +1,12 @@
 <template>
-  <div>搜索模块</div>
+  <div class="container">
+    <van-nav-bar left-text="返回" left-arrow title="搜索中心" @click-left="$router.back()"></van-nav-bar>
+  </div>
 </template>
 
 <script>
 export default {
+  name: 'search'
 }
 </script>
 
