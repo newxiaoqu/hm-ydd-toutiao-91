@@ -1,14 +1,14 @@
 import axios from 'axios' // 引入axios插件
 import JSONBig from 'json-bigint' // 处理大数组插件
 import store from '@/store' // 引入vuex中的store实例
-import { Store } from 'vuex'
+// import { Store } from 'vuex'
 import router from '@/router'
 
 // 创建一个axios实例，和原来的axios没关系
 const instance = axios.create({
   // 构造参数
   baseURL: 'http://ttapi.research.itcast.cn/app/v1_0', // 设置请求地址常量
-  transformRespones: [function (data) {
+  transformResponse: [function (data) {
     // data是后端响应的字符串 默认的转化是JSON.parse 处理大数字是有问题的，需要用JSONBIG替换
     // return data ? JSONBig.parse(data):{}
     try {
@@ -22,7 +22,7 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(function (config) {
   // 应该在返回配置之前  网配置里面塞入token
-  if (Store.state.user.token) {
+  if (store.state.user.token) {
     // 如果token存在，就要注入
     config.headers['Authorization'] = `Bearer  ${store.state.user.token}` // 统一注入token
   }
@@ -33,7 +33,7 @@ instance.interceptors.request.use(function (config) {
 })
 
 // 响应拦截器
-instance.interceptors.response.user(function (response) {
+instance.interceptors.response.use(function (response) {
   // 得到的response实际上被axios包一层数据
   try {
     // 将数据解构
@@ -46,9 +46,7 @@ instance.interceptors.response.user(function (response) {
   // 如何判断失效
   // error=>config(当前请求的配置) request(请求)response(响应)
   if (error.response && error.response.status === 401) {
-    let toPath = { path: '/login',
-      query: {
-        redirectUrl: router.currentRoute.path } } // 跳转对象
+    let toPath = { path: '/login', query: { redirectUrl: router.currentRoute.path } } // 跳转对象
 
     // 表示token过期，先判断  是否有refresh_token
     if (store.state.user.refresh_token) {
