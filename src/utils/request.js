@@ -24,7 +24,7 @@ instance.interceptors.request.use(function (config) {
   // 应该在返回配置之前  网配置里面塞入token
   if (store.state.user.token) {
     // 如果token存在，就要注入
-    config.headers['Authorization'] = `Bearer  ${store.state.user.token}` // 统一注入token
+    config.headers['Authorization'] = `Bearer ${store.state.user.token}` // 统一注入token
   }
   // 配置信息
   return config
@@ -66,6 +66,7 @@ instance.interceptors.response.use(function (response) {
             refresh_token: store.state.user.refresh_token // 将之前refresh_token  14天有效
           }
         })// 更新vuex的数据 也更新了本地缓存数据
+
         return instance(error.config) // 把刚才错误的请求再次发送出去  然后将promise返回
       } catch (error) {
         // 如果错误  表示补救措施也没用了，应该跳转到登录页，并且  把废掉的user全都干掉
