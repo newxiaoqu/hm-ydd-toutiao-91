@@ -11,3 +11,12 @@ export function getArticles (params) {
     params: { with_top: 1, ...params }
   })
 }
+// 不喜欢文章的接口
+// 因body的传参要放在data中
+export function disLikeArticle (data) {
+  return request({
+    url: '/article/dislikes',
+    method: 'post',
+    data
+  })
+}
