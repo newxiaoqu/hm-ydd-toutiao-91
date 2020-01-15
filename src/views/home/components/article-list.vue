@@ -20,7 +20,8 @@
             <div class="info_box">
               <span>{{ article.aut_name }}</span>
               <span>{{ article.comm_count }}评论</span>
-              <span>{{ article.pubdate }}</span>
+              <!-- 使用过滤器 -->
+              <span>{{ article.pubdate | relTime }}</span>
               <span class="close">
                 <van-icon name="cross"></van-icon>
               </span>
@@ -56,7 +57,7 @@ export default {
   methods: {
     // 上拉加载
     async onLoad () {
-      await this.$sleep(2000)
+      await this.$sleep(800)
       // 加载方法
       //   setTimeout(() => {
       //     if (this.articles.length === 50) {
@@ -84,7 +85,7 @@ export default {
       }
     },
     async onRefresh () {
-      await this.$sleep(2000) // 等待sleep  resolve
+      await this.$sleep(800) // 等待sleep  resolve
       // 触发下拉刷新
       //   console.log('下拉刷新')
       //   setTimeout(() => {
