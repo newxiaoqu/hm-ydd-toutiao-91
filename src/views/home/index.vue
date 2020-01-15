@@ -4,33 +4,45 @@
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
         <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
         <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-        <article-list :channel_id="channel.id"></article-list>
+        <article-list @showMoreAction="openMoreAction" :channel_id="channel.id"></article-list>
       </van-tab>
     </van-tabs>
     <span class="bar_btn">
       <van-icon name="wap-nav" />
     </span>
+    <!-- 放置弹层 -->
+    <van-popup :style="{width:'80%'}" v-model="showMoreAction">
+      <more-action></more-action>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
 import { getMyChannels } from '@/api/channels'
+import MoreAction from './components/more-action'
 export default {
   name: 'home',
   data () {
     return {
       activeIndex: 0, // 默认启动索引为0的标签
-      channels: [] // 频道需要的数据
+      channels: [], // 频道需要的数据
+      showMoreAction: false, // 用来控制显示反馈弹层
+      articleId: null // 定义一个值接收
     }
   },
   components: {
-    ArticleList // 注册组件
+    ArticleList, // 注册组件
+    MoreAction
   },
   methods: {
     async getMyChannels () {
       let data = await getMyChannels()
       this.channels = data.channels // 更新原来的channels
+    },
+    openMoreAction (artId) {
+      this.showMoreAction = true
+      this.articleId = artId
     }
   },
   created () {
