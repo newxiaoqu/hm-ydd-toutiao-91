@@ -12,7 +12,9 @@
     </span>
     <!-- 放置弹层 -->
     <van-popup :style="{width:'80%'}" v-model="showMoreAction">
-      <more-action @dislike="dislike"></more-action>
+      <!-- 包裹反馈组件 -->
+      <!-- reports事件中的第一个参数$event实际上就是moreAction组件传出的type -->
+      <more-action @dislike="dislikeOrReport($event,'dislike')" @reports="dislikeOrReport($event,'report')"></more-action>
     </van-popup>
   </div>
 </template>
@@ -21,7 +23,7 @@
 import ArticleList from './components/article-list'
 import { getMyChannels } from '@/api/channels'
 import MoreAction from './components/more-action'
-import { disLikeArticle } from '@/api/article.js'
+import { disLikeArticle, reportArticle } from '@/api/article.js'
 import eventBus from '@/utils/eventBus'
 export default {
   name: 'home',
@@ -48,15 +50,40 @@ export default {
       this.articleId = artId // 接收不喜欢文章的id
     },
     // 调用不喜欢文章的接口
-    async dislike () {
+    // async dislike () {
+    //   try {
+    //     await disLikeArticle({ target: this.articleId })
+    //     this.$gnotify({ type: 'success', message: '操作成功' })
+    //     // 触发一个时间，发出广播，听到广播的文章列表 去删除对应的数据
+    //     // 文章id  频道id
+    //     eventBus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+    //     this.showMoreAction = false // 关闭弹层
+    //   } catch (error) {
+    //     this.$gnotify({ type: 'danger', message: '操作失败' })
+    //   }
+    // },
+    // 调用举报文章的接口
+    // async report (type) {
+    //   try {
+    //     await reportArticle({ target: this.articleId, type })
+    //     this.$gnotify({ type: 'success', message: '操作成功' })
+    //     eventBus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+    //     this.showMoreAction = false // 关闭弹层
+    //   } catch (error) {
+    //     this.$gnotify({ type: 'danger', message: '操作失败' })
+    //   }
+    // },
+    // 不喜欢或者举报
+    async dislikeOrReport (params, operatetype) {
       try {
         if (this.articleId) {
-          await disLikeArticle({ target: this.articleId })
+          operatetype === 'dislike' ? await disLikeArticle({
+            target: this.articleId
+          }) : await reportArticle({ target: this.articleId, type: params })
           this.$gnotify({ type: 'success', message: '操作成功' })
-          // 触发一个时间，发出广播，听到广播的文章列表 去删除对应的数据
-          // 文章id  频道id
-          eventBus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
-          this.showMoreAction = false // 关闭弹层
+          eventBus.$emit('delArticle', this.articleId,
+            this.channels[this.activeIndex].id)
+          this.showMoreAction = false
         }
       } catch (error) {
         this.$gnotify({ type: 'danger', message: '操作失败' })
@@ -85,13 +112,13 @@ export default {
       height: 2px;
     }
   }
-  /deep/ .van-tabs__content{
+  /deep/ .van-tabs__content {
     flex: 1;
     overflow: hidden;
   }
-  /deep/ .van-tab__pane{
+  /deep/ .van-tab__pane {
     height: 100%;
-    .scroll-wrapper{
+    .scroll-wrapper {
       height: 100%;
       overflow-y: auto;
     }

@@ -22,6 +22,7 @@
               <span>{{ article.comm_count }}评论</span>
               <!-- 使用过滤器 -->
               <span>{{ article.pubdate | relTime }}</span>
+              <!-- 点击叉号  要告诉父组件，我要反馈 -->
               <span class="close" v-if="user.token" @click="$emit('showMoreAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
