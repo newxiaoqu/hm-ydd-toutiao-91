@@ -56,20 +56,21 @@ export default {
   methods: {
     // 上拉加载
     async onLoad () {
+      await this.$sleep(2000)
       // 加载方法
-    //   setTimeout(() => {
-    //     if (this.articles.length === 50) {
-    //       // 停止追加
-    //       this.finished = true
-    //     } else {
-    //       let arr = Array.from(
-    //         Array(10),
-    //         (value, index) => index + this.articles.length + 1
-    //       )
-    //       this.articles.push(...arr) // 把生成的数据追加到末尾
-    //       this.upLoading = false // 关闭状态
-    //     }
-    //   }, 1000)
+      //   setTimeout(() => {
+      //     if (this.articles.length === 50) {
+      //       // 停止追加
+      //       this.finished = true
+      //     } else {
+      //       let arr = Array.from(
+      //         Array(10),
+      //         (value, index) => index + this.articles.length + 1
+      //       )
+      //       this.articles.push(...arr) // 把生成的数据追加到末尾
+      //       this.upLoading = false // 关闭状态
+      //     }
+      //   }, 1000)
       let data = await getArticles({ channel_id: this.channel_id, timestamp: this.timestamp || Date.now() })
       // 追加数据到队尾
       this.articles.push(...data.results)
@@ -83,15 +84,16 @@ export default {
       }
     },
     async onRefresh () {
+      await this.$sleep(2000) // 等待sleep  resolve
       // 触发下拉刷新
-    //   console.log('下拉刷新')
-    //   setTimeout(() => {
-    //     let arr = Array.from(Array(10), (value, index) => '追加' + (index + 1))
-    //     this.articles.unshift(...arr) // 将数据添加到队首
-    //     this.downLoading = false // 关掉下拉状态
-    //     this.refreshSuccessText = `更新了 ${arr.length}条数据`
-    //   }, 1000)
-    // 下拉加载永远拉取的是最新的数据
+      //   console.log('下拉刷新')
+      //   setTimeout(() => {
+      //     let arr = Array.from(Array(10), (value, index) => '追加' + (index + 1))
+      //     this.articles.unshift(...arr) // 将数据添加到队首
+      //     this.downLoading = false // 关掉下拉状态
+      //     this.refreshSuccessText = `更新了 ${arr.length}条数据`
+      //   }, 1000)
+      // 下拉加载永远拉取的是最新的数据
       const data = await getArticles({ channel_id: this.channel_id, timestamp: Date.now() })
       this.downLoading = false // 关掉下拉状态
       // 有可能  最新没有推荐数据
