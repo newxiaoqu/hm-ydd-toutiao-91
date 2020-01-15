@@ -9,13 +9,13 @@
             <h3 class="van-ellipsis">{{ article.title }}</h3>
             <!-- 三图 -->
             <div class="img_box" v-if="article.cover.type===3">
-              <van-image class="w33" fit="cover" src="article.cover.images[0]" />
-              <van-image class="w33" fit="cover" src="article.cover.images[1]" />
-              <van-image class="w33" fit="cover" src="article.cover.images[2]" />
+              <van-image lazy-load class="w33" fit="cover" src="article.cover.images[0]" />
+              <van-image lazy-load class="w33" fit="cover" src="article.cover.images[1]" />
+              <van-image lazy-load class="w33" fit="cover" src="article.cover.images[2]" />
             </div>
             <!-- 单图 -->
             <div class="img_box" v-else-if="article.cover.type===1">
-              <van-image class="w100" fit="cover" src="article.cover.images[0]" />
+              <van-image lazy-load class="w100" fit="cover" src="article.cover.images[0]" />
             </div>
             <div class="info_box">
               <span>{{ article.aut_name }}</span>
@@ -57,7 +57,7 @@ export default {
   methods: {
     // 上拉加载
     async onLoad () {
-      await this.$sleep(800)
+      await this.$sleep()
       // 加载方法
       //   setTimeout(() => {
       //     if (this.articles.length === 50) {
@@ -85,7 +85,7 @@ export default {
       }
     },
     async onRefresh () {
-      await this.$sleep(800) // 等待sleep  resolve
+      await this.$sleep() // 等待sleep  resolve
       // 触发下拉刷新
       //   console.log('下拉刷新')
       //   setTimeout(() => {
