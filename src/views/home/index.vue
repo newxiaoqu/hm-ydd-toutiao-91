@@ -20,7 +20,7 @@
     <!-- 编辑频道 -->
     <van-action-sheet :round=false title="编辑频道" v-model="showChannelEdit">
       <!-- 放置频道编辑组件 -->
-      <channel-edit :channels= 'channels'>
+      <channel-edit @selectChannel="selectChannel" :channels= 'channels'>
       </channel-edit>
     </van-action-sheet>
   </div>
@@ -99,6 +99,12 @@ export default {
       } catch (error) {
         this.$gnotify({ type: 'danger', message: '操作失败' })
       }
+    },
+    // 切换到对应的频道关闭弹层
+    selectChannel (id) {
+      let index = this.channels.findIndex(item => item.id === id) // 获取切换频道的索引
+      this.activeIndex = index // 将tabs激活标签切换到对应的标签下
+      this.showChannelEdit = false // 关闭弹层
     }
   },
   created () {
