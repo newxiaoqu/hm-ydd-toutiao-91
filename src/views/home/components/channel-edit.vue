@@ -10,7 +10,7 @@
       <!-- 可选频道 -->
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="(item,i) in channels" :key="item.id ">
-          <span @click="$emit('selectChannel',item.id)" class="f12">{{ item.name }}</span>
+          <span :class="{red:i===activeIndex}" @click="$emit('selectChannel',item.id)" class="f12">{{ item.name }}</span>
           <!-- 通过编辑状态 来控制 叉号图标的显示和隐藏 -->
           <!-- 先控制第一个推荐频道不允许删除，然后再根据状态决定是否显示删除叉号 -->
           <template v-if="i!==0">
@@ -46,6 +46,9 @@ export default {
       required: true,
       type: Array,
       default: () => [] // eslint 要求我们必须用一个函数来声明数组类型，所以用箭头函数
+    },
+    activeIndex: {
+      type: Number
     }
   },
   methods: {
