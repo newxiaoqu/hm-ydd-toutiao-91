@@ -14,7 +14,8 @@
           <!-- 通过编辑状态 来控制 叉号图标的显示和隐藏 -->
           <!-- 先控制第一个推荐频道不允许删除，然后再根据状态决定是否显示删除叉号 -->
           <template v-if="i!==0">
-              <van-icon v-show="editing" class="btn" name="cross"></van-icon>
+            <!-- 告诉父组件要删除哪个频道,传出我们的频道id -->
+              <van-icon @click="$emit('delChannel',item.id)" v-show="editing" class="btn" name="cross"></van-icon>
           </template>
         </van-grid-item>
       </van-grid>
