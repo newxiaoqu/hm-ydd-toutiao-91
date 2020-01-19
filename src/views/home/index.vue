@@ -20,7 +20,8 @@
     <!-- 编辑频道 -->
     <van-action-sheet :round=false title="编辑频道" v-model="showChannelEdit">
       <!-- 放置频道编辑组件 -->
-      <channel-edit @delChannel="delChannel"
+      <channel-edit @addChannel ='addChannel'
+      @delChannel="delChannel"
       :activeIndex="activeIndex"
        @selectChannel="selectChannel"
         :channels= 'channels'>
@@ -31,7 +32,7 @@
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels, delChannel } from '@/api/channels'
+import { getMyChannels, delChannel, addChannel } from '@/api/channels'
 import MoreAction from './components/more-action'
 import { disLikeArticle, reportArticle } from '@/api/article.js'
 import eventBus from '@/utils/eventBus'
@@ -127,6 +128,11 @@ export default {
       } catch (error) {
         this.$gnotify({ type: 'danger', message: '删除频道失败' })
       }
+    },
+    // 添加频道
+    async addChannel (channel) {
+      await addChannel(channel) // 完成写入本地缓存的操作
+      this.channels.push(channel) // 自身加一个频道影响子组件
     }
   },
   created () {
