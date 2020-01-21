@@ -11,7 +11,7 @@
           <p class="time">{{ article.pubdate | relTime}}</p>
         </div>
         <!-- is_followed 为true表示已关注该用户 false表示未关注 -->
-        <van-button round size="small" type="info">{{ article.is_followed ? '已关注':'+ 关注'}}</van-button>
+        <van-button @click="follow()" round size="small" type="info">{{ article.is_followed ? '已关注':'+ 关注'}}</van-button>
       </div>
       <!-- v-html可以渲染html标签 -->
       <div class="content" v-html="article.content">
@@ -28,6 +28,7 @@
 
 <script>
 import { getArticleInfo } from '@/api/article'
+import { followUser, unFollowUser } from '@/api/user'
 export default {
   name: 'articles',
   article: {}, // 接受文章数据
@@ -41,6 +42,22 @@ export default {
     async getArticleInfo () {
       let { articleId } = this.$route.query // 结构查询id
       this.article = await getArticleInfo(articleId) // 查询数据
+    },
+    // 关注与取消关注
+    async follow () {
+      try {
+        if (this.article.is_followed) {
+          // 取消关注接口
+          await unFollowUser(this.article.aut_id)
+        } else {
+          // 关注接口
+          await followUser({ target: this.article.aut_id })
+        }
+        this.article.is_followed = !this.article.is_followed
+        this.$gnotify({ type: 'success', message: '操作成功' })
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '操作失败' })
+      }
     }
   },
   created () {
