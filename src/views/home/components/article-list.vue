@@ -4,7 +4,7 @@
   <div class="scroll-wrapper">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad" finished-text="不能再给你太多了">
-        <van-cell v-for="article in articles" :key="article.art_id.toString()">
+        <van-cell :to="`/article?articleId=${article.art_id.toString()}`" v-for="article in articles" :key="article.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{ article.title }}</h3>
             <!-- 三图 -->
@@ -23,7 +23,7 @@
               <!-- 使用过滤器 -->
               <span>{{ article.pubdate | relTime }}</span>
               <!-- 点击叉号  要告诉父组件，我要反馈 -->
-              <span class="close" v-if="user.token" @click="$emit('showMoreAction',article.art_id.toString())">
+              <span class="close" v-if="user.token" @click.stop="$emit('showMoreAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
             </div>
