@@ -22,6 +22,8 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
         <van-button round size="small" :class="{active:article.attitude===0}" plain icon="delete">不喜欢</van-button>
       </div>
+      <!-- 放置我们的评论组件 -->
+      <comment></comment>
     </div>
   </div>
 </template>
@@ -29,6 +31,7 @@
 <script>
 import { getArticleInfo } from '@/api/article'
 import { followUser, unFollowUser } from '@/api/user'
+import Comment from './components/comment'
 export default {
   name: 'articles',
   article: {}, // 接受文章数据
@@ -36,6 +39,9 @@ export default {
     return {
       article: {} // 专门用来接收文章的数据
     }
+  },
+  components: {
+    Comment
   },
   methods: {
     // 获取文章详情
@@ -93,6 +99,7 @@ export default {
     position:sticky;
     background-color: #fff;
     top:46px;
+    z-index: 2;
     .text {
       flex: 1;
       padding-left: 10px;
