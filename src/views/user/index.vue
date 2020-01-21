@@ -2,25 +2,29 @@
 <div>
         <div class="user-profile">
       <div class="info">
-        <van-image round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <van-image round :src="UserInfo.photo" />
         <h3 class="name">
-          用户名
+          {{ UserInfo.name }}
           <br />
           <van-tag size="mini">申请认证</van-tag>
         </h3>
       </div>
       <van-row>
-        <van-col span="8">
-          <p>0</p>
+        <van-col span="6">
+          <p>{{ UserInfo.art_count }}</p>
           <p>动态</p>
         </van-col>
-        <van-col span="8">
-          <p>0</p>
+        <van-col span="6">
+          <p>{{ UserInfo.follow_count }}</p>
           <p>关注</p>
         </van-col>
-        <van-col span="8">
-          <p>0</p>
+        <van-col span="6">
+          <p>{{ UserInfo.fans_count }}</p>
           <p>粉丝</p>
+        </van-col>
+        <van-col span="6">
+          <p>{{ UserInfo.like_count }}</p>
+          <p>被赞</p>
         </van-col>
       </van-row>
     </div>
@@ -40,13 +44,46 @@
       <van-cell icon="edit" title="编辑资料" to="/user/profile" is-link />
       <van-cell icon="chat-o" title="小智同学" to="/user/chat" is-link />
       <van-cell icon="setting-o" title="系统设置" is-link />
-      <van-cell icon="warning-o" title="退出登录" to="/login" is-link />
+      <van-cell icon="warning-o" title="退出登录" @click="lgout" is-link />
     </van-cell-group>
 </div>
 </template>
 
 <script>
+import { getUserInfo } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
+  name: 'user',
+  data () {
+    return {
+      UserInfo: {}
+    }
+  },
+  methods: {
+    // 获取个人信息
+    async getUserInfo () {
+      this.UserInfo = await getUserInfo()
+    },
+    ...mapMutations(['clearUser']), // 映射vuex中的mutations方法
+    // 登出方法
+    async lgout () {
+      try {
+        // 应该友好的询问一下
+        await this.$dialog.confirm({
+          title: '提示',
+          message: '确定要退出登录吗'
+        })
+        // 应该将之前的token给删除掉
+        this.clearUser() // 清除用户的token
+        this.$router.push('/login') // 跳到登录页
+      } catch (error) {
+
+      }
+    }
+  },
+  created () {
+    this.getUserInfo()
+  }
 }
 </script>
 
