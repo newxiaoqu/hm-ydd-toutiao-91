@@ -22,7 +22,7 @@
           <p>{{ comment.content }}</p>
           <p>
             <span class="time">{{ comment.pubdate | relTime }}</span>&nbsp;
-            <van-tag plain @click="showReply=true">{{ comment.reply_count }} 回复</van-tag>
+            <van-tag plain @click="openReply()">{{ comment.reply_count }} 回复</van-tag>
           </p>
         </div>
       </div>
@@ -33,6 +33,19 @@
         <span class="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
+       <!-- 回复列表组件 -->
+    <van-action-sheet v-model="showReply" :round="false" class="reply_dailog" title="回复评论">
+      <van-list v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
+        <div class="item van-hairline--bottom van-hairline--top" v-for="index in 8" :key="index">
+          <van-image round width="1rem" height="1rem" fit="fill" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+          <div class="info">
+            <p><span class="name">一阵清风</span></p>
+            <p>评论的内容，。。。。</p>
+            <p><span class="time">两天内</span></p>
+          </div>
+        </div>
+      </van-list>
+    </van-action-sheet>
   </div>
 
   <!-- 都不输入框 -->
@@ -41,6 +54,7 @@
 <script>
 import { getComments } from '@/api/article'
 export default {
+  name: 'comment',
   data () {
     return {
       // 上拉加载中
@@ -51,14 +65,28 @@ export default {
       value: '',
       // 控制提交中状态数据
       submiting: false,
-      comments: []
+      // 评论列表数据
+      comments: [],
+      // 表示分页依据  如果为空，表示从第一页开始
+      offset: null,
+      // ------------回复相关数据-----------------
+      // 控制回复弹窗显示隐藏
+      showReply: false, // 控制回复列表组件的显示和隐藏
+      reply: {
+        // 专门用reply这个对象存放回复相关的数据
+        loading: false, // 是回复列表组件的状态
+        finished: false, // 是恢复列表组件的结束状态
+        offset: null, // 偏移量  获取评论的评论的分页依据 c
+        list: [] // 用于存放当前弹出的关于某个评论的回复列表的数据
+
+      }
     }
   },
   methods: {
     // 加载一级评论
     async onLoad () {
       let data = await getComments({
-        type: 'a',
+        type: 'a', // 获取的类型
         offset: this.offset, // 偏移量
         source: this.$route.query.articleId // 获取文章id
       })
@@ -69,6 +97,10 @@ export default {
         // 如果没结束
         this.offset = this.last_id // 将last_id设置成偏移量  给下次请求使用
       }
+    },
+    // 打开回复
+    openReply () {
+      this.showReply = true
     }
   }
 }
@@ -119,6 +151,25 @@ export default {
   .submit {
     font-size: 12px;
     color: #3296fa;
+  }
+}
+.reply_dailog {
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+  .van-action-sheet__content{
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px 44px;
   }
 }
 </style>
