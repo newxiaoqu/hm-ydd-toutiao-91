@@ -30,11 +30,11 @@
     <div class="reply-container van-hairline--top">
       <van-field v-model="value" placeholder="写评论...">
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <span class="submit" @click="submit()" v-else slot="button">提交</span>
       </van-field>
     </div>
        <!-- 回复列表组件 -->
-    <van-action-sheet v-model="showReply" :round="false" class="reply_dailog" title="回复评论">
+    <van-action-sheet @closed="reply.commentId=null" v-model="showReply" :round="false" class="reply_dailog" title="回复评论">
       <van-list @load="getReply" :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
         <div class="item van-hairline--bottom van-hairline--top" v-for="reply in reply.list" :key="reply.com_id.toString()">
           <van-image round width="1rem" height="1rem" fit="fill" src="reply.aut_photo" />
@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import { getComments } from '@/api/article'
+import { getComments, commentOrReply } from '@/api/article'
 export default {
   name: 'comment',
   data () {
@@ -124,6 +124,46 @@ export default {
         // 如果没结束
         this.reply.offset = data.last_id // 将last_id设置成偏移量 给下次请求使用
       }
+    },
+    // 提交评论的方法
+    async submit () {
+      if (!this.value) return false // 表示如果当前评论内容为空就立刻返回
+      this.submiting = true // 将提交状态设置成true控制用户单位时间内评论的数据次数
+      await this.$sleep() // 强制等待500毫秒
+      try {
+        // 评论
+        // 一种是对文章进行评论
+        // 一种是对评论进行评论
+        // 如果不为空 继续
+        // 怎么样区分当前是对文章进行评论  还是对评论进行评论
+        // 两种方式  一种方式通过showReply是true还是false
+        // 另外一种是通过reply.commentId是存在还是不存在
+        const data = await commentOrReply({
+          // this.reply.commentId存在 就要对评论进行评论  否则传文章Id
+          target: this.reply.commentId ? this.reply.commentId.toString() : this.$route.query.articleId, // 要么是文章id，要么是评论id
+          content: this.value, // 评论的内容
+          art_id: this.reply.commentId ? this.$route.query.articleId : null // 如果此时对文章进行评论art_id不能传 如果是对评论进行评论  文章ID必须传
+        })
+        // 评论成功怎么处理  刷新页面 => 将评论的数据呈现到视图上
+        // 需要知道加那个数组的最前面
+        if (this.reply.commentId) {
+          // 对评论进行评论
+          this.reply.list.unshift(data.new_obj) // 将数据加到队首 评论的评论
+          // 如果对评论的进行评论之后，应该找到该评论 并将 该评论的回复次数 +1
+          // 怎么找到对应的评论
+          // 如果找到了comment 就是找到的对象  如果找不到comment就是一个undefined
+          const comment = this.comments.find(item => item.com_id.toString())
+          comment && comment.reply_count++ // 如果找到了  就对回复加1
+        } else {
+          // 对文章进行评论
+          this.comments.unshift(data.new_obj) // 文章评论
+        }
+        this.value = '' // 清空输入框
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '评论失败' })
+      }
+      // 最后去关闭状态
+      this.submiting = false // 关闭进度条
     }
   }
 }
