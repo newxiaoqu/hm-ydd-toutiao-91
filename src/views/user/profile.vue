@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 导航 -->
-    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存"></van-nav-bar>
+    <van-nav-bar @click-right="saveUserInfo" left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存"></van-nav-bar>
     <van-cell-group>
       <!-- 头像 -->
       <van-cell is-link title="头像" @click="showPhoto=true" center>
@@ -56,7 +56,7 @@
 
 <script>
 import dayjs from 'dayjs'
-import { getUserProfile, updateImg } from '@/api/user'
+import { getUserProfile, updateImg, saveUserInfo } from '@/api/user'
 export default {
   name: 'profile',
   data () {
@@ -80,6 +80,17 @@ export default {
     }
   },
   methods: {
+    // 保存方法  调用保存接口  这里是不需要传photo数据的
+    // 1.我们通过别的方法 更新了头像
+    // 2.photo base64字符串
+    async saveUserInfo () {
+      try {
+        await saveUserInfo({ ...this.user, photo: null })
+        this.$gnotify({ type: 'success', message: '保存成功' })
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '保存失败' })
+      }
+    },
     // 点击选择图片时触发
     openChangeFile () {
       // 上传本地文件
