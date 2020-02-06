@@ -4,7 +4,7 @@
     <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存"></van-nav-bar>
     <van-cell-group>
       <!-- 头像 -->
-      <van-cell is-link title="头像" center>
+      <van-cell is-link title="头像" @click="showPhoto=true" center>
         <!-- 点击图片  显示选择图片的弹层 -->
         <van-image
           slot="default"
@@ -12,7 +12,6 @@
           height="1.5rem"
           fit="cover"
           round
-           @click="showPhoto=true"
           :src="user.photo"
         />
       </van-cell>
@@ -23,7 +22,8 @@
     <!-- 选择头像弹层 -->
     <van-popup v-model="showPhoto" style="width:80%">
       <van-cell is-link title="拍照"></van-cell>
-      <van-cell is-link title="本地相册选择图片"></van-cell>
+      <van-cell @click="openChangeFile" is-link title="本地相册选择图片">
+      </van-cell>
     </van-popup>
     <!-- 昵称弹层 -->
     <!-- close-on-click-overlay点击背景关闭弹窗功能被禁用掉 -->
@@ -49,12 +49,14 @@
         @confirm="comfirmDate"
       />
     </van-popup>
+    <!-- 文件选择控件 -->
+    <input ref='myFile' @change="upload()" type="file" style="display:none">
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs'
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, updateImg } from '@/api/user'
 export default {
   name: 'profile',
   data () {
@@ -78,6 +80,26 @@ export default {
     }
   },
   methods: {
+    // 点击选择图片时触发
+    openChangeFile () {
+      // 上传本地文件
+      // 触发文件上传组件的点击事件
+      // 需要先获取文件上传的dom对象再触发
+      this.$refs.myFile.click() // 触发文件上传组件的点击方法
+    },
+    // 当我们选择图片之后就会触发
+    async upload () {
+      // 这里应该做什么
+      // 应该上传头像  获取我们选择的图片
+      // 首先应该吧这个图片上传到服务器
+      // 调用编辑头像的方法
+      let data = new FormData()
+      data.append('photo', this.$refs.myFile.files[0]) // 往formData中添加参数
+      let result = await updateImg(data)
+      // 应该 吧地址 同步设置给当前页面的数据
+      this.user.photo = result.photo // 将上传成功的头像设置给当前头像
+      this.showPhoto = false // 关闭弹层
+    },
     // 绑定按钮点击事件
     btnName () {
       if (this.user.name.length < 1 || this.user.name.length > 7) {
