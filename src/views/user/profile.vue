@@ -1,12 +1,123 @@
 <template>
   <div class="container">
-    <van-nav-bar title="编辑资料" left-arrow right-text="保存" @click-left="$router.back()"></van-nav-bar>
+    <!-- 导航 -->
+    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存"></van-nav-bar>
+    <van-cell-group>
+      <!-- 头像 -->
+      <van-cell is-link title="头像" center>
+        <!-- 点击图片  显示选择图片的弹层 -->
+        <van-image
+          slot="default"
+          width="1.5rem"
+          height="1.5rem"
+          fit="cover"
+          round
+           @click="showPhoto=true"
+          :src="user.photo"
+        />
+      </van-cell>
+      <van-cell is-link title="名称" @click="showName=true" :value="user.name" />
+      <van-cell is-link title="性别" @click="showGender=true" :value='user.gender===0? "男":"女"' />
+      <van-cell is-link title="生日" @click="showBirthday=true" :value="user.birthday" />
+    </van-cell-group>
+    <!-- 选择头像弹层 -->
+    <van-popup v-model="showPhoto" style="width:80%">
+      <van-cell is-link title="拍照"></van-cell>
+      <van-cell is-link title="本地相册选择图片"></van-cell>
+    </van-popup>
+    <!-- 昵称弹层 -->
+    <!-- close-on-click-overlay点击背景关闭弹窗功能被禁用掉 -->
+    <van-popup :close-on-click-overlay="false" v-model="showName" style="width:80%">
+      <!-- 编辑用户昵称  双向绑定用户的昵称 -->
+      <van-field :error-message="nameMsg" v-model.trim="user.name" type="textarea" rows="4"></van-field>
+      <!-- 关闭按钮组件 -->
+      <van-button type="primary" size="large" block @click="btnName">确定</van-button>
+    </van-popup>
+    <!-- 性别弹层 -->
+    <van-action-sheet @select="selectItem" :actions="actions" v-model="showGender" cancel-text="取消"></van-action-sheet>
+    <!-- 生日弹层 -->
+    <van-popup v-model="showBirthday" position="bottom">
+      <!-- 选择出生日期  出生日期应该小于现在时间 -->
+      <!-- type表示  当前的日期类型 年月日 -->
+      <!-- v-model表示当前的时间  取消时 将弹层关闭 -->
+      <van-datetime-picker
+        v-model="currentDate"
+        type="date"
+        :min-date="minDate"
+        :max-date="maxDate"
+        @cancel="showBirthday=false"
+        @confirm="comfirmDate"
+      />
+    </van-popup>
   </div>
 </template>
 
 <script>
+import dayjs from 'dayjs'
+import { getUserProfile } from '@/api/user'
 export default {
-  name: 'profile'
+  name: 'profile',
+  data () {
+    return {
+      showPhoto: false, // 是否显示选择头像弹层
+      showName: false, // 是否显示编辑昵称的弹层
+      showGender: false, // 是否显示性别选择的弹层
+      showBirthday: false, // 是否显示日期弹层
+      // 性别数据
+      actions: [{ name: '男' }, { name: '女' }],
+      minDate: new Date(1900, 1, 1), // 最小时间
+      maxDate: new Date(), // 生日最大时间 永远是小于等于当前时间的
+      currentDate: new Date(), // 当前时间
+      nameMsg: '', // 专门来显示错误信息
+      // 用户信息
+      user: {
+        name: '', // 用户昵称
+        gender: 0, // 0男 1女
+        birthday: '' // 给一个默认生日
+      }
+    }
+  },
+  methods: {
+    // 绑定按钮点击事件
+    btnName () {
+      if (this.user.name.length < 1 || this.user.name.length > 7) {
+        // 如果长度大于7或者小于1  表示这个昵称不符合要求
+        this.nameMsg = '您的用户昵称不符合1-7的长度要求'
+        return false
+      }
+      // 如果满足的话 就会继续执行
+      this.nameMsg = '' // 先把提示消息清空
+      this.showName = false // 关闭弹层
+    },
+    // 当点击菜单项时 会触发该方法
+    selectItem (item) {
+      // item就是选择的对象
+      this.user.gender = item.name === '男' ? 0 : 1 // 根据判断得到当前的性别
+      this.showGender = false // 关闭当前的弹层
+    },
+    // 点击生日时  触发
+    showDate () {
+      // 要将字符串2019-08-08转化成日期类型
+      this.currentDate = new Date(this.user.birthday) // 将当前用户的生日 赋值给绑定当前时间的数据
+      this.showBirthday = true // 显示生日弹层
+    },
+    // 点击生日弹层的确定时  触发的方法
+    comfirmDate (date) {
+      this.user.birthday = dayjs(date).format('YYYY-MM-DD') // 转化后的结果赋值给user中的生日
+      this.showBirthday = false // 关闭弹层
+    },
+    // 封装一个获取数据、设置数据的方法
+    // 获取用户资料的方法
+    async getUserProfile () {
+      let data = await getUserProfile()
+      // 将数据赋值给user
+      this.user = data
+      this.photo = data.photo
+    }
+  },
+  created () {
+    this.getUserProfile() // 调用获取用户资料的方法
+  }
 }
 </script>
 
