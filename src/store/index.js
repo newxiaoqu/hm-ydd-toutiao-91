@@ -6,7 +6,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    user: auth.getUser()
+    user: auth.getUser(), // 从缓存中
+    photo: null // 用户头像
   },
   mutations: {
     updateUser (state, payload) {
@@ -17,6 +18,10 @@ export default new Vuex.Store({
     clearUser (state) {
       state.user = {}
       auth.delUser() // 将缓存中的数据也清空
+    },
+    // 更新用户头像的方法  载荷  携带参数用的
+    updatePhoto (state, payload) {
+      state.photo = payload.photo // 将载荷里面的数据设置给state
     }
   },
   actions: {

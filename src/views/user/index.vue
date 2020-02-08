@@ -63,8 +63,9 @@ export default {
     // 获取个人信息
     async getUserInfo () {
       this.UserInfo = await getUserInfo()
+      this.updatePhoto({ photo: this.UserInfo.photo }) // 更新用户的头像
     },
-    ...mapMutations(['clearUser']), // 映射vuex中的mutations方法
+    ...mapMutations(['clearUser', 'updatePhoto']), // 映射vuex中的mutations方法
     // 登出方法
     async lgout () {
       try {

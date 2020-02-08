@@ -110,6 +110,10 @@ export default {
       // 应该 吧地址 同步设置给当前页面的数据
       this.user.photo = result.photo // 将上传成功的头像设置给当前头像
       this.showPhoto = false // 关闭弹层
+      // 当头像上传成功之后  把上传成功的头像的地址 设置给state
+      this.updatePhoto({
+        photo: result.photo
+      }) // 调用mutations方法将数据设置给公共状态
     },
     // 绑定按钮点击事件
     btnName () {
@@ -143,6 +147,8 @@ export default {
     // 获取用户资料的方法
     async getUserProfile () {
       let data = await getUserProfile()
+      // 将头像地址  更新设置给公共的state
+      this.updatePhoto({ photo: data.photo }) // 载荷参数
       // 将数据赋值给user
       this.user = data
       this.photo = data.photo
