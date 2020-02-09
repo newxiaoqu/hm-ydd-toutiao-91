@@ -1,7 +1,7 @@
 <template>
     <div class="container">
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
-    <div class="chat-list">
+    <div class="chat-list" ref="myList">
       <!-- list的数据分两种 一种是小智同学说的 一种是我自己说的 -->
       <!-- 这个div要展示两种场景 小智的场景 左边  我的场景 右边 -->
       <!-- 根据当前name的值  决定  样式 是left 还是right -->
@@ -14,10 +14,10 @@
         <!-- 右边再放置一个图片 -->
         <van-image v-if="item.name!='xz'" fit="cover" round :src="photo"></van-image>
       </div>
-      <div class="chat-item right">
+      <!-- <div class="chat-item right">
         <div class="chat-pao">ewqewq</div>
         <van-image  fit="cover" round :src="photo" />
-      </div>
+      </div> -->
     </div>
     <div class="reply-container van-hairline--top">
       <van-field v-model="value" placeholder="说点什么...">
@@ -70,14 +70,56 @@ export default {
     // 这个位置 只有小智同学回复的时候才会调用
     this.socket.on('message', (data) => {
       this.list.push({ ...data, name: 'xz' }) // name：xz相当于 给我们的消息记录一下 谁发了这个消息
+      this.scrollBottom() // 小智接受消息的时候 也要设置滚动条距离
     })
   },
   methods: {
-    send () {
-
+    async send () {
+      // 发送消息的时候 要做什么事情？
+      // 获取要发送的内容
+      if (!this.value) return false // 如果为空字符串  就直接返回 不继续往下走了
+      this.loading = true // 先打开加载状态
+      // 设置一下时间的间隔
+      await this.$sleep() // 默认时间是500毫秒
+      // 如果不为空  继续发送
+      // emit发送消息 on接收消息
+      let obj = {
+        msg: this.value, // 消息内容
+        timestmp: Date.now() // 时间戳给什么  应该给当前的时间戳
+      }
+      // 发送这条消息
+      this.socket.emit('message', obj) // 发送消息
+      // 发出消息之后应该做什么事情
+      // 应该吧刚发送的消息  加到  消息列表里面
+      this.list.push(obj)
+      // 清空本身的消息内容
+      this.value = '' // 清空内容
+      this.loading = false // 关闭回复状态
+      this.scrollBottom() // 消息发送完毕 滚动条设置距离
+    },
+    // 我们来定义一个滚动方法
+    // 在当前视图的更新之后执行
+    // 滚到底部
+    scrollBottom () {
+      // 需要通过获取滚动条高度 和设置滚动条距离来滚动
+      // 滚动条的位置是通过什么属性来控制的呢
+      // scrollTop  滚动条位置距离顶部距离数据来控制
+      // 需要将位置滚动底部
+      // 想要保证这个方法执行的时候  数据的视图已经更新完毕
+      // $nextTick会在上一次数据更新 并且视图完成渲染之后执行
+      this.$nextTick(() => {
+        // 可以保证  在滚动的时候 视图已经更新完毕
+        this.$refs.myList.scrollTop = this.$refs.myList.scrollHeight
+      })
     }
+  },
+  // 页面销毁之前的钩子函数
+  beforeDestroy () {
+    // 销毁连接
+    this.socket.close() // 销毁连接
   }
 }
+
 </script>
 
 <style lang="less" scoped>
