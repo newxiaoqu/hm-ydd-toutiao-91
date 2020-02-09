@@ -1,7 +1,7 @@
 <template>
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-  <div class="scroll-wrapper">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad" finished-text="不能再给你太多了">
         <van-cell :to="`/article?articleId=${article.art_id.toString()}`" v-for="article in articles" :key="article.art_id.toString()">
@@ -50,7 +50,8 @@ export default {
       articles: [], // 定义一个数组
       refreshSuccessText: '更新成果', // 文本
       downLoading: false, // 是否开启下拉刷新
-      timestamp: null // 定义一个时间戳，这个时间戳用来告诉服务器现在我要求什么样的时间的数据
+      timestamp: null, // 定义一个时间戳，这个时间戳用来告诉服务器现在我要求什么样的时间的数据
+      scrollTop: 0 // 记录滚动的位置
     }
   },
   props: {
@@ -72,8 +73,31 @@ export default {
         }
       }
     })
+    // 开启一个新的监听 监听当前tab切换的事件
+    eventBus.$on('changeTab', id => {
+      // 判断一个id是否等于 该组件通过props得到的频道id
+      if (id === this.channel_id) {
+        // 如果相等 说明找对了article-list实例
+        // 因为article-list是有多个的
+        // 为什么这里没有滚动呢？
+        // 是因为切换事件之后 会执行 dom 更新 => dom的更新是异步的
+        // 如果保证自己 在上一次完整页面渲染更新之后 执行逻辑
+        // this.$nextTick=>会在数据  响应式之后 页面渲染完毕之后执行
+        // this.$nextTick会保证在changeTab动作切换完成并且完成界面渲染之后执行
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+            // 表示该文章列表是存在滚动的
+            this.$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
   },
   methods: {
+    // // 记录滚动的位置
+    remember (event) {
+      this.scrollTop = event.target.scrollTop
+    },
     // 上拉加载
     async onLoad () {
       await this.$sleep()
@@ -132,6 +156,18 @@ export default {
       }
     }
 
+  },
+  // 激活函数  当组件被keep-alive包裹 keep-alive=>router-view=>home=>article-list
+  activated () {
+    // console.log(this.scrollTop)
+    // 唤醒的时候 需要 把记录的位置 回复回去
+    // 需要在组件重新激活的时候  重新 设置原来的滚动条
+    // 怎么滚回去
+    console.log(this.$refs.myScroll)
+    if (this.scrollTop && this.$refs.myScroll) {
+      // 当滚动距离 不为0 且dom元素存在的情况下 才去做滚动
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置赋值给dom元素
+    }
   }
 }
 </script>

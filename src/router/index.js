@@ -32,7 +32,10 @@ const routes = [{
   component: Layout, // 一级路由
   children: [{
     path: '/',
-    component: Home // 二级路由  首页
+    component: Home, // 二级路由  首页
+    meta: {
+      isAlive: true // 是否缓存组件实例
+    }
   },
   {
     path: '/question',

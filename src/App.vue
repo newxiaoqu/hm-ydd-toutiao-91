@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <div id="nav">
+    <keep-alive>
+      <!-- 里面是当需要缓存时 -->
+    <router-view v-if="$route.meta.isAlive"/>
+    </keep-alive>
+    <!-- 外面是不需要缓存时 -->
+    <router-view v-if="!$route.meta.isAlive"/>
 
-    </div>
-    <router-view/>
   </div>
 </template>
 
