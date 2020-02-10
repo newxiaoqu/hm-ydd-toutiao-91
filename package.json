@@ -32,6 +32,7 @@
     "less-loader": "^5.0.0",
     "lint-staged": "^9.5.0",
     "postcss-pxtorem": "^4.0.1",
+    "terser-webpack-plugin": "^2.3.4",
     "vant": "^2.4.2-beta.2",
     "vue-template-compiler": "^2.6.10"
   },
